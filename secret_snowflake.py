@@ -1,31 +1,45 @@
-NAME_EMAIL = {
-    'Katherine': 'kjwu00#stanford.edu',
-    'Leon': 'leonbi@stanford.edu',
-    'Michael': 'mchang6@stanford.edu',
-    'Saw':'sawkyaw@stanford.edu'
-}
+import random
+import sys
+import smtplib
 
-def detect_cycle(matches):
-    pass
+PORT = 587
 
-def make_pairing(matches):
-    matches.clear()
+def read_file(in_file):
+    name_email = {}
+    with open(in_file, 'r') as f:
+        for line in f:
+            parts = line.split(",")
+            if len(parts) != 2:
+                raise Exception ("make sure every line in the input file is: name, email")
+            name_email[parts[0].strip()] = parts[1].strip()
+    return name_email
 
-    people = set(NAME_EMAIL.keys())
-    people_giving_left = set(NAME_EMAIL.keys())
-    people_getting_left = set(NAME_EMAIL.keys())
+def make_pairing(name_email, matches):
+    people = list(name_email.keys())
+    if len(people) < 2:
+        raise Exception ("make sure there are more than two people")
 
+    random.shuffle(people)
+    for i in range(len(people)):
+        matches[people[i]] = people[(i+1)%len(people)]
 
-    if (detect_cycle(matches)):
-        make_pairing(matches)
-
-def send_emails(matches):
-    pass
+def send_emails(name_email, matches):
+    try:
+        server = smtplib.SMTP('smtp.gmail.com', 587)
+        server.ehlo()
+    except:
+        print("Was unable to setup server for emaiil.")
+    
+    
 
 def main():
+    if len(sys.argv) != 2:
+        raise Exception("usage: python3 secret_snowflake.py <in_file>")
+
+    name_email = read_file(sys.argv[1])
     matches = {}
-    make_pairing(matches)
-    send_emails(matches)
+    make_pairing(name_email, matches)
+    send_emails(name_email, matches)
 
 if __name__ == '__main__':
     main()
