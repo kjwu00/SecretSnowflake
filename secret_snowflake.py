@@ -38,13 +38,12 @@ def send_emails(name_email, matches):
     try:
         # Connect to email server.
         server = smtplib.SMTP_SSL('smtp.gmail.com', 465)
-        server.ehlo()
         server.login(GMAIL_USER, GMAIL_PASSWORD)
 
         # Send emails
         for giver, receiver in matches.items():
             sent_from = GMAIL_USER
-            to = [name_email[receiver]]
+            to = name_email[receiver]
             subject = "Secret Snowflake"
             body = "Hi " + giver + "! Get a gift for " + receiver +"."
 
@@ -54,7 +53,8 @@ def send_emails(name_email, matches):
             Subject: %s
 
             %s
-            """ % (sent_from, ", ".join(to), subject, body)
+            """ % (sent_from, to, subject, body)
+
             server.sendmail(sent_from, to, email_text)
 
         server.close()
