@@ -43,7 +43,7 @@ def send_emails(name_email, matches):
         # Send emails
         for giver, receiver in matches.items():
             sent_from = GMAIL_USER
-            to = name_email[receiver]
+            to = name_email[giver]
             subject = "Secret Snowflake"
             body = "Hi " + giver + "! Get a gift for " + receiver +"."
 
