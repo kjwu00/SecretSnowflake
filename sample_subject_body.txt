@@ -1,7 +1,7 @@
 Secret Snowflake!!!
 Hi <giver>, 
 
-you're supposed to give a gift to <receiver>.
+You're supposed to give a gift to <receiver>.
 Thanks for participating!!!
 
 From,
