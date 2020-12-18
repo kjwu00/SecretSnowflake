@@ -8,7 +8,7 @@ load_dotenv()
 GMAIL_USER = os.getenv("GMAIL_USER")
 GMAIL_PASSWORD = os.getenv("GMAIL_PASSWORD")
 
-def read_file(in_file):
+def read_participants_file(in_file):
     name_email = {}
     with open(in_file, 'r') as f:
         for line in f:
@@ -23,6 +23,17 @@ def read_file(in_file):
 
     return name_email
 
+def read_message_file(in_file):
+    if len(open(in_file).readlines(  )) < 2:
+        raise Exception ("please include a subject in the first line and the body text in the subsequent lines")
+
+    body_lines = []
+    with open(in_file, 'r') as f:
+        subject = f.readline()
+        for line in f:
+            body_lines.append(line)
+    body = ''.join(body_lines)
+    return subject, body        
 
 def make_pairing(name_email, matches):
     people = list(name_email.keys())
@@ -34,7 +45,7 @@ def make_pairing(name_email, matches):
         matches[people[i]] = people[(i+1)%len(people)]
 
 
-def send_emails(name_email, matches):
+def send_emails(name_email, matches, subject, body):
     try:
         # Connect to email server.
         server = smtplib.SMTP_SSL('smtp.gmail.com', 465)
@@ -42,21 +53,13 @@ def send_emails(name_email, matches):
 
         # Send emails
         for giver, receiver in matches.items():
+            body = body.replace("<giver>", giver)
+            body = body.replace("<receiver>", receiver)
             sent_from = GMAIL_USER
             to = name_email[giver]
-            subject = "Secret Snowflake"
-            body = "Hi " + giver + "! Get a gift for " + receiver +"."
-
-            email_text = """\
-            From: %s
-            To: %s
-            Subject: %s
-
-            %s
-            """ % (sent_from, to, subject, body)
+            email_text = "From: %s\nTo: %s\nSubject: %s\n\n%s" % (sent_from, to, subject, body)
 
             server.sendmail(sent_from, to, email_text)
-
         server.close()
                     
     except:
@@ -64,13 +67,14 @@ def send_emails(name_email, matches):
 
 
 def main():
-    if len(sys.argv) != 2:
+    if len(sys.argv) != 3:
         raise Exception("usage: python3 secret_snowflake.py <in_file>")
 
-    name_email = read_file(sys.argv[1])
+    name_email = read_participants_file(sys.argv[1])
+    subject, body = read_message_file(sys.argv[2])
     matches = {}
     make_pairing(name_email, matches)
-    send_emails(name_email, matches)
+    send_emails(name_email, matches, subject, body)
 
 
 if __name__ == '__main__':
